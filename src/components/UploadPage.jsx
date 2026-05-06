@@ -9,7 +9,6 @@ import {
     CircularProgress,
     Alert,
     Skeleton,
-    Divider,
 } from "@mui/material";
 
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -27,25 +26,16 @@ export default function UploadPage({ onLoadSample }) {
     const [done, setDone] = useState(false);
     const [dragOver, setDragOver] = useState(false);
 
+    const [result, setResult] = useState(null);
+    const [errorMsg, setErrorMsg] = useState("");
+
     const startProcessing = (name) => {
         setFileName(name);
-        setLoading(true);
+        setLoading(false);
         setDone(false);
         setProgress(0);
-
-        let p = 0;
-        const interval = setInterval(() => {
-            p += 12;
-            setProgress(Math.min(100, p));
-
-            if (p >= 100) {
-                clearInterval(interval);
-                setTimeout(() => {
-                    setLoading(false);
-                    setDone(true);
-                }, 300);
-            }
-        }, 180);
+        setResult(null);
+        setErrorMsg("");
     };
 
     const handleFile = (e) => {
@@ -58,6 +48,9 @@ export default function UploadPage({ onLoadSample }) {
 
         try {
             setLoading(true);
+            setProgress(20);
+            setErrorMsg("");
+            setResult(null);
 
             const formData = new FormData();
             formData.append("file", inputRef.current.files[0]);
@@ -67,26 +60,23 @@ export default function UploadPage({ onLoadSample }) {
                 body: formData,
             });
 
-            let data;
+            setProgress(60);
 
-            try {
-                data = await res.json();
-            } catch (e) {
-                throw new Error("Invalid server response");
-            }
+            const data = await res.json();
 
-            console.log("📩 Backend Response:", data);
+            setProgress(90);
 
             if (!res.ok) {
-                throw new Error(data?.message || "Upload failed");
+                throw new Error(data?.msg || "Upload failed");
             }
 
+            setResult(data);
             setDone(true);
-            alert("File uploaded successfully ✅");
+            setProgress(100);
 
         } catch (err) {
-            console.log("❌ FRONTEND ERROR:", err.message);
-            alert(err.message || "Something went wrong ❌");
+            setErrorMsg(err.message || "Something went wrong ❌");
+            setDone(false);
 
         } finally {
             setLoading(false);
@@ -96,6 +86,7 @@ export default function UploadPage({ onLoadSample }) {
     const handleDrop = (e) => {
         e.preventDefault();
         setDragOver(false);
+
         const f = e.dataTransfer.files?.[0];
         if (f) startProcessing(f.name);
     };
@@ -116,55 +107,29 @@ export default function UploadPage({ onLoadSample }) {
     ];
 
     return (
-        <Box
-            sx={{
-                maxWidth: 1200,
-                mx: "auto",
-                p: 2,
-            }}
-        >
-            {/* GRID LAYOUT 60/40 */}
-            <Box
-                sx={{
-                    display: "grid",
-                    gridTemplateColumns: { xs: "1fr", md: "60% 40%" },
-                    gap: 3,
-                }}
-            >
+        <Box sx={{ maxWidth: 1200, mx: "auto", p: 2 }}>
 
-                {/* ================= LEFT SIDE (UPLOAD - 60%) ================= */}
-                <Card
-                    sx={{
-                        borderRadius: 4,
-                        boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-                    }}
-                >
-                    <Box
-                        sx={{
-                            height: 6,
-                            background:
-                                "linear-gradient(90deg,#6366f1,#ec4899,#f59e0b)",
-                        }}
-                    />
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "60% 40%" }, gap: 3 }}>
+
+                {/* ================= LEFT SIDE ================= */}
+                <Card sx={{ borderRadius: 4, boxShadow: "0 10px 30px rgba(0,0,0,0.08)" }}>
+                    <Box sx={{ height: 6, background: "linear-gradient(90deg,#6366f1,#ec4899,#f59e0b)" }} />
 
                     <CardContent sx={{ p: 4 }}>
 
                         <Typography variant="h5" fontWeight={800}>
-                            <CloudUploadIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+                            <CloudUploadIcon sx={{ mr: 1 }} />
                             Upload Dataset
                         </Typography>
 
                         <Typography color="text.secondary" mt={1} mb={3}>
-                            Upload CSV/Excel file for instant analytics processing
+                            Upload CSV / Excel file for processing
                         </Typography>
 
                         {/* DROP AREA */}
                         <Box
                             onClick={() => inputRef.current?.click()}
-                            onDragOver={(e) => {
-                                e.preventDefault();
-                                setDragOver(true);
-                            }}
+                            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                             onDragLeave={() => setDragOver(false)}
                             onDrop={handleDrop}
                             sx={{
@@ -174,18 +139,16 @@ export default function UploadPage({ onLoadSample }) {
                                 border: `2px dashed ${dragOver ? "#6366f1" : "#cbd5e1"}`,
                                 background: dragOver ? "#eef2ff" : "#fff",
                                 cursor: "pointer",
-                                transition: "0.2s",
-                                "&:hover": { background: "#f8fafc" },
                             }}
                         >
                             <CloudUploadIcon sx={{ fontSize: 60, color: "#6366f1" }} />
 
                             <Typography fontWeight={700} mt={1}>
-                                {dragOver ? "Drop file here" : "Click or drag file to upload"}
+                                {dragOver ? "Drop file here" : "Click or drag file"}
                             </Typography>
 
-                            <Typography variant="caption" color="text.secondary">
-                                .csv, .xlsx, .xls (Max 10MB)
+                            <Typography variant="caption">
+                                .csv, .xlsx, .xls
                             </Typography>
 
                             <input
@@ -199,25 +162,15 @@ export default function UploadPage({ onLoadSample }) {
 
                         {/* FILE INFO */}
                         {fileName && (
-                            <Box
-                                mt={3}
-                                p={2}
-                                display="flex"
-                                alignItems="center"
-                                gap={2}
-                                sx={{
-                                    background: "#f1f5f9",
-                                    borderRadius: 2,
-                                }}
-                            >
+                            <Box mt={3} p={2} display="flex" gap={2}
+                                sx={{ background: "#f1f5f9", borderRadius: 2 }}>
+
                                 <DescriptionIcon />
 
                                 <Box flex={1}>
-                                    <Typography fontWeight={600}>
-                                        {fileName}
-                                    </Typography>
+                                    <Typography fontWeight={600}>{fileName}</Typography>
                                     <Typography variant="caption">
-                                        {loading ? "Processing..." : done ? "Completed" : "Selected"}
+                                        {loading ? "Uploading..." : done ? "Completed" : "Ready"}
                                     </Typography>
                                 </Box>
 
@@ -229,69 +182,132 @@ export default function UploadPage({ onLoadSample }) {
                         {/* PROGRESS */}
                         {loading && (
                             <Box mt={3}>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={progress}
-                                    sx={{ height: 8, borderRadius: 5 }}
-                                />
-                                <Box mt={2}>
-                                    <Skeleton height={12} />
-                                    <Skeleton height={12} width="70%" />
-                                </Box>
+                                <LinearProgress variant="determinate" value={progress} />
                             </Box>
                         )}
 
-                        {/* SUCCESS */}
-                        {done && (
-                            <Alert severity="success" sx={{ mt: 3, borderRadius: 2 }}>
-                                File uploaded successfully
-                            </Alert>
-                        )}
+                        {/* ACTIONS */}
+                        <Box mt={4} display="flex" justifyContent="space-between">
 
-                        {/* SAMPLE BUTTON */}
-                        {/* ACTION BUTTONS */}
-                        <Box
-                            mt={4}
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                            gap={2}
-                            flexWrap="wrap"
-                        >
                             <Button
                                 variant="contained"
                                 startIcon={<AutoAwesomeIcon />}
                                 onClick={onLoadSample}
-                                sx={{
-                                    textTransform: "none",
-                                    borderRadius: 2,
-                                    fontWeight: 600,
-                                    background:
-                                        "linear-gradient(135deg,#6366f1,#8b5cf6)",
-                                }}
                             >
-                                Load Sample Data
+                                Load Sample
                             </Button>
 
                             <Button
                                 variant="contained"
                                 disabled={!fileName || loading}
                                 onClick={handleSubmit}
-                                sx={{
-                                    textTransform: "none",
-                                    borderRadius: 2,
-                                    fontWeight: 600,
-                                    background: "#10b981",
-                                    "&:hover": { background: "#059669" },
-                                }}
+                                sx={{ background: "#10b981" }}
                             >
-                                Submit File
+                                Submit
                             </Button>
                         </Box>
+
+                        {/* ERROR */}
+                        {errorMsg && (
+                            <Alert severity="error" sx={{ mt: 2 }}>
+                                {errorMsg}
+                            </Alert>
+                        )}
+
+                        {/* RESULT SUMMARY */}
+                        {result && (
+                            <Box mt={3}>
+
+                                <Alert severity="success">
+                                    {result.message?.insertedMsg}
+                                </Alert>
+
+                                <Alert severity="info" sx={{ mt: 1 }}>
+                                    {result.message?.duplicateMsg}
+                                </Alert>
+
+                                <Alert severity="warning" sx={{ mt: 1 }}>
+                                    {result.message?.errorMsg}
+                                </Alert>
+
+                                <Box display="flex" gap={2} mt={2} flexWrap="wrap">
+
+                                    <Card sx={{ p: 2, flex: 1 }}>
+                                        <Typography fontWeight={600}>Inserted</Typography>
+                                        <Typography fontSize={22} color="green">
+                                            {result.summary.inserted}
+                                        </Typography>
+                                    </Card>
+
+                                    <Card sx={{ p: 2, flex: 1 }}>
+                                        <Typography fontWeight={600}>Duplicates</Typography>
+                                        <Typography fontSize={22} color="orange">
+                                            {result.summary.duplicates}
+                                        </Typography>
+                                    </Card>
+
+                                    <Card sx={{ p: 2, flex: 1 }}>
+                                        <Typography fontWeight={600}>Errors</Typography>
+                                        <Typography fontSize={22} color="red">
+                                            {result.summary.errors}
+                                        </Typography>
+                                    </Card>
+
+                                </Box>
+                            </Box>
+                        )}
+
+                        {/* DUPLICATES LIST */}
+                        {result?.duplicateDetails?.length > 0 && (
+                            <Box mt={3}>
+                                <Typography fontWeight={700} color="orange">
+                                    ⚠️ Duplicate Products
+                                </Typography>
+
+                                <Box sx={{
+                                    maxHeight: 200,
+                                    overflow: "auto",
+                                    p: 2,
+                                    background: "#fff7ed",
+                                    borderRadius: 2,
+                                    mt: 1
+                                }}>
+                                    {result.duplicateDetails.map((item, i) => (
+                                        <Typography key={i} variant="body2">
+                                            {item}
+                                        </Typography>
+                                    ))}
+                                </Box>
+                            </Box>
+                        )}
+
+                        {result?.errorDetails?.length > 0 && (
+                            <Box mt={3}>
+                                <Typography fontWeight={700} color="red">
+                                    ❌ Error Records
+                                </Typography>
+
+                                <Box sx={{
+                                    maxHeight: 200,
+                                    overflow: "auto",
+                                    p: 2,
+                                    background: "#fef2f2",
+                                    borderRadius: 2,
+                                    mt: 1
+                                }}>
+                                    {result.errorDetails.map((item, i) => (
+                                        <Typography key={i} variant="body2">
+                                            {item}
+                                        </Typography>
+                                    ))}
+                                </Box>
+                            </Box>
+                        )}
 
                     </CardContent>
                 </Card>
 
+                {/* ================= RIGHT SIDE ================= */}
                 {/* ================= RIGHT SIDE (INSTRUCTIONS - 40%) ================= */}
                 <Card
                     sx={{

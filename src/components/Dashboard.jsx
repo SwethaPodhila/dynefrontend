@@ -1,13 +1,24 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     Grid,
     Card,
     CardContent,
     Typography,
     Box,
+    Skeleton,
+    Alert,
 } from "@mui/material";
+
 import {
-    ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Cell,
+    ResponsiveContainer,
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    Tooltip,
+    CartesianGrid,
+    Legend,
+    Cell,
 } from "recharts";
 
 import SummaryCard from "./SummaryCard";
@@ -19,26 +30,25 @@ function ChartCard({ title, subtitle, children }) {
     return (
         <Card
             sx={{
-                borderRadius: 3,
-                boxShadow: 3,
-                height: "100%",
+                borderRadius: 4,
+                boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
                 transition: "0.3s",
                 "&:hover": {
-                    boxShadow: 6,
+                    transform: "translateY(-3px)",
+                    boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
                 },
             }}
         >
             <CardContent>
-                <Box mb={2}>
-                    <Typography variant="h6" fontWeight="600">
-                        {title}
+                <Typography variant="h6" fontWeight={700}>
+                    {title}
+                </Typography>
+
+                {subtitle && (
+                    <Typography variant="body2" color="text.secondary" mb={2}>
+                        {subtitle}
                     </Typography>
-                    {subtitle && (
-                        <Typography variant="body2" color="text.secondary">
-                            {subtitle}
-                        </Typography>
-                    )}
-                </Box>
+                )}
 
                 <Box sx={{ width: "100%", height: 280 }}>
                     <ResponsiveContainer width="100%" height="100%">
@@ -50,9 +60,43 @@ function ChartCard({ title, subtitle, children }) {
     );
 }
 
-export default function Dashboard({ products, onUpload }) {
+export default function Dashboard({ onUpload }) {
+
+    // ---------------------------
+    // 🔌 API STATE
+    // ---------------------------
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    // ---------------------------
+    // 🔌 FETCH FROM DB
+    // ---------------------------
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+
+                const res = await fetch("http://localhost:5000/products/products");
+                const data = await res.json();
+
+                setProducts(data || []);
+
+            } catch (err) {
+                setError("Failed to load dashboard data ❌");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    // ---------------------------
+    // 📊 CALCULATIONS (UNCHANGED LOGIC)
+    // ---------------------------
     const stats = useMemo(() => {
-        if (!products.length) return null;
+        if (!products?.length) return null;
 
         const totalProducts = products.length;
 
@@ -79,10 +123,9 @@ export default function Dashboard({ products, onUpload }) {
             .sort((a, b) => (b.ratingCount || 0) - (a.ratingCount || 0))
             .slice(0, 5)
             .map((p) => ({
-                name:
-                    p.productName.length > 16
-                        ? p.productName.slice(0, 16) + "…"
-                        : p.productName,
+                name: p.productName?.length > 16
+                    ? p.productName.slice(0, 16) + "…"
+                    : p.productName,
                 reviews: p.ratingCount,
             }));
 
@@ -130,53 +173,60 @@ export default function Dashboard({ products, onUpload }) {
         };
     }, [products]);
 
+    // ---------------------------
+    // ⏳ LOADING UI
+    // ---------------------------
+    if (loading) {
+        return (
+            <Box>
+                <Skeleton height={80} />
+                <Skeleton height={300} />
+                <Skeleton height={300} />
+            </Box>
+        );
+    }
+
+    // ---------------------------
+    // ❌ ERROR UI
+    // ---------------------------
+    if (error) {
+        return <Alert severity="error">{error}</Alert>;
+    }
+
+    // ---------------------------
+    // 📭 EMPTY STATE
+    // ---------------------------
     if (!products.length) return <EmptyState onUpload={onUpload} />;
 
     return (
-        <Box>
-            {/* 🔹 Summary Cards */}
-            <Grid container spacing={3} mb={3}>
-                <Grid item xs={12} sm={6} md={4}>
-                    <SummaryCard
-                        title="Total Products"
-                        value={stats.totalProducts}
-                        icon="bi-box-seam-fill"
-                        gradient="linear-gradient(135deg,#6366f1,#8b5cf6)"
-                        trend="All catalog items"
-                    />
-                </Grid>
+        <Box sx={{ p: 2, background: "#f8fafc", minHeight: "100vh" }}>
 
-                <Grid item xs={12} sm={6} md={4}>
-                    <SummaryCard
-                        title="Average Rating"
-                        value={`${stats.avgRating} ★`}
-                        icon="bi-star-fill"
-                        gradient="linear-gradient(135deg,#f59e0b,#ec4899)"
-                        trend="Across all products"
-                    />
+            {/* ================= SUMMARY ================= */}
+            <Grid container spacing={3} mb={3}>
+                <Grid item xs={12} md={4}>
+                    <SummaryCard title="Total Products" value={stats.totalProducts} />
                 </Grid>
 
                 <Grid item xs={12} md={4}>
-                    <SummaryCard
-                        title="Total Reviews"
-                        value={stats.totalReviews.toLocaleString()}
-                        icon="bi-chat-quote-fill"
-                        gradient="linear-gradient(135deg,#10b981,#06b6d4)"
-                        trend="Customer feedback"
-                    />
+                    <SummaryCard title="Average Rating" value={`${stats.avgRating} ★`} />
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                    <SummaryCard title="Total Reviews" value={stats.totalReviews} />
                 </Grid>
             </Grid>
 
-            {/* 🔹 Charts */}
+            {/* ================= CHARTS ================= */}
             <Grid container spacing={3}>
+
                 <Grid item xs={12} md={6}>
-                    <ChartCard title="Products per Category" subtitle="Catalog distribution">
+                    <ChartCard title="Products per Category" subtitle="Distribution">
                         <BarChart data={stats.productsPerCategory}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                            <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="category" />
-                            <YAxis allowDecimals={false} />
+                            <YAxis />
                             <Tooltip />
-                            <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                            <Bar dataKey="count">
                                 {stats.productsPerCategory.map((_, i) => (
                                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                                 ))}
@@ -186,41 +236,38 @@ export default function Dashboard({ products, onUpload }) {
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                    <ChartCard title="Top Reviewed Products" subtitle="Most engaged items">
+                    <ChartCard title="Top Reviewed Products">
                         <BarChart data={stats.topReviewed} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                             <XAxis type="number" />
                             <YAxis type="category" dataKey="name" width={120} />
                             <Tooltip />
-                            <Bar dataKey="reviews" fill="#8b5cf6" radius={[0, 8, 8, 0]} />
+                            <Bar dataKey="reviews" fill="#8b5cf6" />
                         </BarChart>
                     </ChartCard>
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                    <ChartCard title="Discount Distribution" subtitle="Discount % spread">
+                    <ChartCard title="Discount Distribution">
                         <BarChart data={stats.discountHist}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
                             <XAxis dataKey="bucket" />
-                            <YAxis allowDecimals={false} />
+                            <YAxis />
                             <Tooltip />
-                            <Bar dataKey="count" fill="#10b981" radius={[8, 8, 0, 0]} />
+                            <Bar dataKey="count" fill="#10b981" />
                         </BarChart>
                     </ChartCard>
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                    <ChartCard title="Category Avg Rating" subtitle="Out of 5">
+                    <ChartCard title="Category Avg Rating">
                         <BarChart data={stats.avgRatingByCategory}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
                             <XAxis dataKey="category" />
                             <YAxis domain={[0, 5]} />
                             <Tooltip />
-                            <Legend />
-                            <Bar dataKey="avg" fill="#ec4899" radius={[8, 8, 0, 0]} />
+                            <Bar dataKey="avg" fill="#ec4899" />
                         </BarChart>
                     </ChartCard>
                 </Grid>
+
             </Grid>
         </Box>
     );
