@@ -54,7 +54,7 @@ export default function UploadPage({ onLoadSample }) {
             const formData = new FormData();
             formData.append("file", inputRef.current.files[0]);
 
-            const res = await fetch("dynebackend-production.up.railway.app/products/upload", {
+            const res = await fetch("https://dynebackend-production.up.railway.app/products/upload", {
                 method: "POST",
                 body: formData,
             });

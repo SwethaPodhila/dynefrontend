@@ -67,7 +67,7 @@ export default function ProductsTable({
                 setLoading(true);
 
                 const res = await axios.get(
-                    "dynebackend-production.up.railway.app/products/products"
+                    "https://dynebackend-production.up.railway.app/products/products"
                 );
 
                 console.log(res.data);
