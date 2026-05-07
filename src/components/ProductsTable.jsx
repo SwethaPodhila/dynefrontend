@@ -17,6 +17,37 @@ import StarIcon from "@mui/icons-material/Star";
 
 import EmptyState from "./EmptyState";
 
+// ================= STATIC CATEGORIES =================
+const categories = [
+    "All",
+
+    "Electronics",
+    "Fashion",
+    "Books",
+    "Home",
+    "Sports",
+
+    // Cable & Accessories
+    "USBCables",
+    "HDMICables",
+    "PowerBanks",
+    "SandwichMakers",
+
+    // Computer Accessories
+    "Pendrives",
+
+    // TV & Entertainment
+    "SmartTelevisions",
+    "StandardTelevisions",
+
+    // Mobile
+    "Smartphones",
+    "ScreenProtectors",
+
+    // Extra
+    "Others",
+];
+
 export default function ProductsTable({
     onUpload,
 }) {
@@ -28,37 +59,6 @@ export default function ProductsTable({
         useState("All");
     const [rating, setRating] =
         useState("All");
-
-  // ================= STATIC CATEGORIES =================
-    const categories = [
-        "All",
-
-        "Electronics",
-        "Fashion",
-        "Books",
-        "Home",
-        "Sports",
-
-        // Cable & Accessories
-        "USBCables",
-        "HDMICables",
-        "PowerBanks",
-        "SandwichMakers",
-
-        // Computer Accessories
-        "Pendrives",
-
-        // TV & Entertainment
-        "SmartTelevisions",
-        "StandardTelevisions",
-
-        // Mobile
-        "Smartphones",
-        "ScreenProtectors",
-
-        // Extra
-        "Others",
-    ];
 
     // ================= FETCH PRODUCTS =================
     useEffect(() => {

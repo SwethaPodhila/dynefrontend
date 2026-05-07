@@ -6,12 +6,10 @@ import {
     Toolbar,
     Typography,
     IconButton,
-    Button,
     List,
     ListItemButton,
     ListItemIcon,
     ListItemText,
-    Divider,
 } from "@mui/material";
 
 import MenuIcon from "@mui/icons-material/Menu";

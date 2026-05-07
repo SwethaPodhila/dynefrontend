@@ -37,6 +37,34 @@ const COLORS = [
     "#84cc16",
 ];
 
+// ================= STATIC CATEGORIES =================
+const categories = [
+    "All",
+
+    "Electronics",
+    "Fashion",
+    "Books",
+    "Home",
+    "Sports",
+
+    // Cable & Accessories
+    "USBCables",
+    "HDMICables",
+    "PowerBanks",
+    "SandwichMakers",
+
+    // Computer Accessories
+    "Pendrives",
+
+    // TV & Entertainment
+    "SmartTelevisions",
+    "StandardTelevisions",
+
+    // Mobile
+    "Smartphones",
+    "ScreenProtectors",
+];
+
 export default function Dashboard({
     onUpload,
 }) {
@@ -49,34 +77,6 @@ export default function Dashboard({
     const [error, setError] =
         useState("");
 
-    // ================= STATIC CATEGORIES =================
-    const categories = [
-        "All",
-
-        "Electronics",
-        "Fashion",
-        "Books",
-        "Home",
-        "Sports",
-
-        // Cable & Accessories
-        "USBCables",
-        "HDMICables",
-        "PowerBanks",
-        "SandwichMakers",
-
-        // Computer Accessories
-        "Pendrives",
-
-        // TV & Entertainment
-        "SmartTelevisions",
-        "StandardTelevisions",
-
-        // Mobile
-        "Smartphones",
-        "ScreenProtectors",
-
-    ];
 
     // ================= FETCH =================
     useEffect(() => {

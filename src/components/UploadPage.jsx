@@ -8,7 +8,6 @@ import {
     LinearProgress,
     CircularProgress,
     Alert,
-    Skeleton,
 } from "@mui/material";
 
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
