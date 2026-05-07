@@ -1,70 +1,74 @@
-# Getting Started with Create React App
+⭐ ReviewIQ – Analytics Suite (Frontend)
+📌 Project Overview
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+ReviewIQ is a React-based Product Ratings & Review Analytics Dashboard that visualizes product data using charts, tables, filters, and search functionality.
 
-## Available Scripts
+It helps analyze:
 
-In the project directory, you can run:
+Product performance
+Customer ratings
+Category-wise insights
+Discount distribution
+Review trends
 
-### `npm start`
+This frontend consumes REST APIs built using a Node.js + Express backend with a PostgreSQL/MySQL database.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+🚀 Tech Stack
+Frontend
+React.js
+Material UI (MUI)
+Axios
+Recharts / ApexCharts
+📂 Project Structure
+src/
+│
+├── components/
+│   ├── Dashboard.jsx
+│   ├── ProductsTable.jsx
+│   ├── SummaryCard.jsx
+│   ├── UploadPage.jsx
+│   ├── Layout.jsx
+│   ├── NavLink.jsx
+│
+├── pages/
+├── data/
+├── App.jsx
+├── index.js
+├── index.css
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+✨ Features
+📊 Dashboard Analytics
+Bar Chart: Products per Category
+Bar Chart: Top Reviewed Products
+Histogram: Discount Distribution
+Bar Chart: Category-wise Average Rating
+📦 Data Management
+CSV / Excel file upload
+Product table with pagination
+Dynamic data rendering
+🔍 Search & Filters
+Search by Product Name
+Filter by Category
+Filter by Ratings / Reviews
+⚡ UI Features
+Responsive design using MUI
+Loading indicators
+Error handling states
+Clean and modern dashboard UI
+🔗 Backend Integration
 
-### `npm test`
+This frontend consumes REST APIs from a Node.js + Express backend.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+🌐 Base URL
+const BASE_URL = "https://dynebackend-production.up.railway.app";
+⚙️ Setup Instructions
+1️⃣ Install Dependencies
+npm install
+2️⃣ Run Application
+npm start
+📡 API Endpoints Used
+📥 Upload Data
+POST /products/upload
+📦 Get Products
+GET /products/products
+🔍 Search & Filter
