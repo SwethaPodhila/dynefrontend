@@ -85,7 +85,7 @@ export default function Dashboard({
                 setLoading(true);
 
                 const res = await fetch(
-                    "http://localhost:5000/products/products"
+                    "dynebackend-production.up.railway.app/products/products"
                 );
 
                 const data =
